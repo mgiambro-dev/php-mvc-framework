@@ -1,0 +1,45 @@
+services:
+    app:
+        build:
+            context: .
+            dockerfile: .docker/Dockerfile
+        image: 'phpmvcframework.dev'
+        container_name: phpmvcframework-app
+        ports:
+            - "80:80"
+        volumes:
+            - ./:/var/www/html
+        networks:
+            - phpmvcframework
+        depends_on:
+            - mysql
+    mysql:
+        image: 'mariadb:latest'
+        container_name: phpmvcframework-db
+        restart: unless-stopped
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+            MYSQL_PASSWORD: ${DB_PASSWORD}
+            MYSQL_USER: ${DB_USERNAME}
+            MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+        volumes:
+            - ./database/dbdata:/var/lib/mysql
+        networks:
+            - phpmvcframework
+    phpmyadmin:
+        image: phpmyadmin
+        container_name: pma
+        ports:
+        - 8080:80
+        environment:
+        - PMA_HOST="mysql"
+        - PMA_ARBITRARY=1     
+        networks:
+            - phpmvcframework
+            
+networks:
+    phpmvcframework:
+        driver: bridge
